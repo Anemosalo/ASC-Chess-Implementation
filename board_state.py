@@ -1,7 +1,7 @@
 import chess
 import math
 def move_list_uci_sorted(board:chess.Board)->list[str]:
-    moves = board.legal_moves
+    moves = board.generate_legal_moves()
     moves_uci=[]
     for move in moves:
         moves_uci.append(move.uci())
