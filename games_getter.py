@@ -13,9 +13,12 @@ def parse_games(pgn_text):
         if game is None:         
             break
 
+        
         moves_uci = []
         for move in game.mainline_moves():        
-            moves_uci.append(move.uci())   
+            moves_uci.append(move.uci())  
+        if len(moves_uci) == 0 or moves_uci == [""] or moves_uci == [" "] or moves_uci == [","]:
+            continue
         all_games.append(moves_uci)
 
     return all_games
@@ -28,6 +31,8 @@ def save_game(url,folder_path):
     games_pgn = data['games']
     pgn_text = []
     for game_pgn in games_pgn:
+        if game_pgn["rules"]!="chess":
+            continue
         pgn_text.append(game_pgn["pgn"])
     final_string = str()
     for game in parse_games("\n\n".join(pgn_text)):

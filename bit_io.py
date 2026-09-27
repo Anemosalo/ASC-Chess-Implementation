@@ -75,7 +75,6 @@ class BitReader:
 
 
 
-
  
 def main():
     w = BitWriter()
