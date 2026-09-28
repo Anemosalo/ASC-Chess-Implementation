@@ -7,13 +7,15 @@ def next_msb(board:chess.Board,move_sequence:list[str]):
         return 0
     legal_moves = board_state.move_list_uci_sorted(board)
     b_t = board_state.compute_bt(legal_moves)
-    while b_t == 0:
+    k_t = board_state.compute_Kt(legal_moves)
+    while k_t <=2:
         board.push_uci(move_sequence[0])
         move_sequence = move_sequence[1:]
         legal_moves = board_state.move_list_uci_sorted(board)
         b_t = board_state.compute_bt(legal_moves)
         if move_sequence == []:
                 return 0
+        k_t = board_state.compute_Kt(legal_moves)
     legal_moves = board_state.move_list_uci_sorted(board)
     k_t = board_state.compute_Kt(legal_moves)
     u_t = board_state.compute_Ut(legal_moves)
@@ -60,6 +62,11 @@ def encode_game(move_sequence:list[str]):
         else:
             s_t = None
             c_t = j_t
+        if k_t==2:
+            writer.write_bits(c_t,b_t)
+            board.push_uci(move_sequence[0])
+            move_sequence = move_sequence[1:]
+            continue
         if p_t != None:
             if b_t>1:
                 writer.write_bits(c_t,b_t-1)

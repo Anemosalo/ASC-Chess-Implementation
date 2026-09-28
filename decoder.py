@@ -22,6 +22,14 @@ def decode_game(data):
             board.push_uci(legal_moves[0])
             move_sequence.append(legal_moves[0])
             continue
+        if k_t==2:
+            c_t = reader.read_bits(1)
+            if c_t == -1:
+                break
+            j_t = c_t
+            board.push_uci(legal_moves[j_t])
+            move_sequence.append(legal_moves[j_t])
+            continue
         if p_t == None:
             c_t = reader.read_bits(b_t)
             if c_t == -1:
