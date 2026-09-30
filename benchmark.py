@@ -83,7 +83,6 @@ def E_of(k_j_list):
     if (k_j_list[index])[1] < u_of(k_j_list[index][0]):
         return 1
     return 0
-    return 0    
 
 def asc_payload_bits(data):
     r = data[-1] & 7

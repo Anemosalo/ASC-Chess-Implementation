@@ -27,7 +27,11 @@ def parse_games(pgn_text):
 def save_game(url,folder_path):
     headers = {"User-Agent":"ASC-Chess-Implementation (anemosalouphs@gmail.com)"}
     response = requests.get(url,headers=headers)
+    response.raise_for_status()
     data = response.json()
+    if 'games' not in data:
+        print(f"No games found at {url}")
+        return
     games_pgn = data['games']
     pgn_text = []
     for game_pgn in games_pgn:

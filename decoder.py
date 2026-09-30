@@ -35,10 +35,7 @@ def decode_game(data):
             if c_t == -1:
                 break
         else:
-            if b_t==1:
-                c_t = reader.read_bits(b_t)
-            else:
-                c_t = reader.read_bits(b_t-1)
+            c_t = reader.read_bits(b_t-1)
             if c_t == -1:
                 break
             c_t = (p_t<<(b_t -1) | c_t)

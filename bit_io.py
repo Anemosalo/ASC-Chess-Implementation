@@ -62,9 +62,12 @@ class BitReader:
         return bit
 
     def read_bits(self,n):
-        if self.byte_pos==self.last_byte:
-            if self.bit_pos == self.last_valid_bit_pos:
-                return -1 ##End of data aka game is over here
+        position = self.byte_pos*8 + self.bit_pos
+        end = self.last_byte*8 + self.last_valid_bit_pos
+        if position == end:
+            return -1 ##End of data aka game is over here
+        if position + n > end:
+            raise EOFError("Fewer bits left than requested: the data is corrupt")
         value = 0
         for _ in range(n):
             value = (value<<1)|self.read_bit()
