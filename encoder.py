@@ -18,17 +18,11 @@ def resolve_chain(board:chess.Board,move_sequence:list[str],start:int):
                 break
         temp_board.push_uci(move_sequence[i])
         i+=1
-    msb_t = 0
-    chain_codes = []
-    for j_t,k_t,u_t,b_t in reversed(chain):
-        if j_t < u_t and msb_t == 1:
-            c_t = j_t + k_t
-        else:
-            c_t = j_t
-        msb_t = (c_t>>b_t-1)&1
-        chain_codes.append((c_t,msb_t))
-    chain_codes.reverse()
-    return chain_codes
+    # Every codeword in a chain starts with the same bit as the last one (0 if the chain
+    # runs to the end of the game), so no backward pass is needed.
+    j_last,k_last,u_last,b_last = chain[-1]
+    msb = (j_last>>b_last-1)&1 if j_last >= u_last else 0
+    return [j_t + k_t*msb if j_t < u_t else j_t for j_t,k_t,u_t,b_t in chain]
 
 def encode_game(move_sequence:list[str]):
 
@@ -36,7 +30,7 @@ def encode_game(move_sequence:list[str]):
 
     board = chess.Board()
     writer = BitWriter()
-    p_t = None
+    pending = False
     chain_codes = []
     chain_pos = 0
     for i in range(len(move_sequence)):
@@ -57,20 +51,13 @@ def encode_game(move_sequence:list[str]):
         if chain_pos == len(chain_codes):
             chain_codes = resolve_chain(board,move_sequence,i)
             chain_pos = 0
-        c_t = chain_codes[chain_pos][0]
+        c_t = chain_codes[chain_pos]
         chain_pos+=1
-        if j_t < u_t:
-            if chain_pos == len(chain_codes):
-                s_t = 0
-            else:
-                s_t = chain_codes[chain_pos][1]
-        else:
-            s_t = None
-        if p_t != None:
+        if pending:
             writer.write_bits(c_t,b_t-1)
         else:
             writer.write_bits(c_t,b_t)
-        p_t = s_t
+        pending = j_t < u_t
         board.push_uci(move_sequence[i])
     writer.pad_trailer()
     return writer.data()
