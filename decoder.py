@@ -1,7 +1,7 @@
 from bit_io import BitReader
 import board_state
 import chess
-
+from math import floor
 
 def decode_game(data):
     reader = BitReader(data)
@@ -41,15 +41,16 @@ def decode_game(data):
             c_t = (p_t<<(b_t -1) | c_t)
             
 
-        if c_t< u_t:
-            p_t = 0
-            j_t = c_t
-        elif c_t >= k_t:
-            p_t = 1
-            j_t = c_t - k_t
+        if c_t< 2*u_t:
+            if c_t%2 == 0:
+                p_t = 0
+            else:
+                p_t = 1
+            j_t = floor(c_t/2)
         else:
             p_t = None
-            j_t = c_t
+            j_t = c_t - u_t
+
 
         board.push_uci(legal_moves[j_t])
         move_sequence.append(legal_moves[j_t])

@@ -1,28 +1,8 @@
 from bit_io import BitWriter
 import board_state
 import chess
+from math import floor
 
-def resolve_chain(board:chess.Board,move_sequence:list[str],start:int):
-    temp_board = board.copy(stack=False)
-    chain = []
-    i = start
-    while i < len(move_sequence):
-        legal_moves = board_state.move_list_uci_sorted(temp_board)
-        k_t = board_state.compute_Kt(legal_moves)
-        if k_t >=3:
-            u_t = board_state.compute_Ut(legal_moves)
-            b_t = board_state.compute_bt(legal_moves)
-            j_t = legal_moves.index(move_sequence[i])
-            chain.append((j_t,k_t,u_t,b_t))
-            if j_t >= u_t:
-                break
-        temp_board.push_uci(move_sequence[i])
-        i+=1
-    # Every codeword in a chain starts with the same bit as the last one (0 if the chain
-    # runs to the end of the game), so no backward pass is needed.
-    j_last,k_last,u_last,b_last = chain[-1]
-    msb = (j_last>>b_last-1)&1 if j_last >= u_last else 0
-    return [j_t + k_t*msb if j_t < u_t else j_t for j_t,k_t,u_t,b_t in chain]
 
 def encode_game(move_sequence:list[str]):
 
@@ -31,8 +11,6 @@ def encode_game(move_sequence:list[str]):
     board = chess.Board()
     writer = BitWriter()
     pending = False
-    chain_codes = []
-    chain_pos = 0
     for i in range(len(move_sequence)):
         legal_moves = board_state.move_list_uci_sorted(board)
         k_t = board_state.compute_Kt(legal_moves)
@@ -48,11 +26,27 @@ def encode_game(move_sequence:list[str]):
             writer.write_bits(c_t,b_t)
             board.push_uci(move_sequence[i])
             continue
-        if chain_pos == len(chain_codes):
-            chain_codes = resolve_chain(board,move_sequence,i)
-            chain_pos = 0
-        c_t = chain_codes[chain_pos]
-        chain_pos+=1
+        if j_t < u_t:
+            temp_board = board.copy()
+            temp_board.push_uci(legal_moves[j_t])
+            msb_next = 0
+            for next_i in range(i+1, len(move_sequence)):
+                next_legal = board_state.move_list_uci_sorted(temp_board)
+                next_k = board_state.compute_Kt(next_legal)
+                if next_k >= 3:
+                    next_u = board_state.compute_Ut(next_legal)
+                    next_b = board_state.compute_bt(next_legal)
+                    next_j = next_legal.index(move_sequence[next_i])
+                    if next_j<next_u:
+                        msb_next = (2*next_j)>>(next_b-1)
+                    else:
+                        msb_next = (next_j+next_u)>>(next_b-1)
+                    break
+                temp_board.push_uci(move_sequence[next_i])
+            c_t = 2*j_t + msb_next
+            
+        else:
+            c_t = j_t + u_t
         if pending:
             writer.write_bits(c_t,b_t-1)
         else:
