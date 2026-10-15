@@ -56,6 +56,7 @@ Identity ASC - TB = E holds in 1083/1083 games (E = 1 in 471)
 | `benchmark.py` | Compares the naive code, truncated binary, ASC and the mixed-radix bound. |
 | `roundtrip.py` | Checks that decoding gives back every game exactly. |
 | `games_getter.py` | Downloads games from the chess.com public API into `games_archive/`. |
+| `speed/` | A short test of decoding speed, truncated binary against ASC, in C. See `speed/README.md`. |
 
 ## Data
 
