@@ -1,5 +1,7 @@
 # ASC-Chess-Implementation
 
+## Update: By mapping aliasable options to {2j,2j+1} (free LSB) instead of {j,j+K t} (free MSB), encoder lookahead drops from one alias chain to a single stash-capable step with identical bit lengths.
+
 Alias Stash Coding (ASC) applied to chess games. This is the code behind the paper
 *Alias Stash Coding: Recycling the Unused Codewords of Fixed-Length Codes*.
 
